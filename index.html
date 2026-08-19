@@ -71,6 +71,11 @@
   .settings-section:first-of-type { border-top: none; }
   .settings-label { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 10px; }
   .settings-hint { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; margin: 8px 0 0; }
+  .irs-reminder {
+    background: #FFF6E0; border: 1px solid var(--gold); color: #7A5A17; font-size: 12px; line-height: 1.55;
+    padding: 10px 12px; border-radius: 8px; margin: 4px 0 2px;
+  }
+  .irs-reminder a { color: #7A5A17; font-weight: 700; }
   .logout-settings-btn { background: var(--coral); }
   .logout-settings-btn:hover { background: #D13E48; }
   .tab-btn {
@@ -178,6 +183,14 @@
     width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
     font-size: 14px; font-family: inherit; box-sizing: border-box;
   }
+  .password-wrap { position: relative; }
+  .password-wrap input { padding-right: 42px; }
+  .eye-btn {
+    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    width: 32px; height: 32px; border: none; background: none; color: var(--text-muted);
+    cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 6px;
+  }
+  .eye-btn:hover { background: var(--bg); color: var(--navy); }
   .gate-btn {
     width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--teal);
     color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; margin-top: 6px;
@@ -193,9 +206,6 @@
   .gate-link { text-align: center; font-size: 12px; color: var(--teal-dark); margin-top: 14px; cursor: pointer; text-decoration: underline; }
   .gate-hint { font-size: 11px; color: var(--text-muted); margin-top: 16px; line-height: 1.5; border-top: 1px solid var(--border); padding-top: 12px; }
   .logout-link { font-size: 12px; font-weight: 700; color: var(--coral); cursor: pointer; text-decoration: underline; }
-
-  .notes-toggle { font-size: 12.5px; font-weight: 700; color: var(--teal-dark); cursor: pointer; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
-  .notes-toggle:hover { color: var(--navy); }
 
   .save-error-banner {
     display: none; position: fixed; left: 16px; right: 16px; bottom: 20px; z-index: 999;
@@ -279,7 +289,6 @@
   .empty { text-align: center; color: var(--text-muted); font-size: 14px; padding: 24px 0; }
   .loading { text-align: center; color: var(--text-muted); font-size: 14px; padding: 40px 0; }
   .note-block { font-size: 12.5px; color: var(--text-muted); line-height: 1.65; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
-  .notes-toggle + .note-block { margin-top: 10px; padding-top: 0; border-top: none; }
   .note-block strong { color: var(--text); }
 
   html, body { overflow-x: hidden; width: 100%; }
@@ -321,14 +330,40 @@
 <div class="gate-screen" id="loginScreen" style="display:none;">
   <div class="gate-card">
     <h1 id="loginTitle">Log In</h1>
-    <p>Log in to sync your budget across every device.</p>
+    <p id="loginSubtitle">Log in to sync your budget across every device.</p>
     <div class="gate-error" id="loginError"></div>
+
     <button class="gate-btn google-btn" id="googleLoginBtn">Sign in with Google</button>
     <div class="gate-divider"><span>or use email/password</span></div>
-    <div class="gate-field"><label>Email</label><input id="loginEmail" type="email" autocomplete="username"></div>
-    <div class="gate-field"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password"></div>
+
+    <div class="gate-field">
+      <label>Email</label>
+      <input id="loginEmail" type="email" autocomplete="username">
+    </div>
+
+    <div class="gate-field">
+      <label>Password</label>
+      <div class="password-wrap">
+        <input id="loginPassword" type="password" autocomplete="current-password">
+        <button type="button" class="eye-btn" id="togglePass1" title="Show password"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+      </div>
+    </div>
+
+    <div class="gate-field" id="confirmPasswordField" style="display:none;">
+      <label>Confirm Password</label>
+      <div class="password-wrap">
+        <input id="confirmPassword" type="password" autocomplete="new-password">
+        <button type="button" class="eye-btn" id="togglePass2" title="Show password"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+      </div>
+    </div>
+
+    <div class="gate-link" id="forgotPasswordLink">Forgot password?</div>
+
     <button class="gate-btn" id="loginBtn">Log In</button>
-    <button class="gate-btn secondary" id="signupBtn">Create Account</button>
+    <button class="gate-btn" id="signupSubmitBtn" style="display:none;">Create Account</button>
+
+    <div class="gate-link" id="switchToSignupLink">Don't have an account? Create one</div>
+    <div class="gate-link" id="switchToLoginLink" style="display:none;">Already have an account? Log in</div>
   </div>
 </div>
 
@@ -500,7 +535,6 @@ let activeTab = "budget";
 let editMode = { budget: false, investments: false, pay: false };
 let expandedCategory = null;
 let sectionOpen = { necessities: true, savings: false, discretionary: true };
-let notesOpen = { investStrategy: false };
 let expandedYears = new Set();
 let expandedYearMonths = new Set();
 
@@ -603,7 +637,11 @@ function buildTabNav() {
     const btn = document.createElement("div");
     btn.className = "tab-btn" + (tab.key === activeTab ? " active" : "");
     btn.textContent = tab.label;
-    btn.onclick = () => { activeTab = tab.key; render(); };
+    btn.onclick = () => {
+      if (tab.key !== activeTab) editMode[activeTab] = false; // auto-lock the tab you're leaving
+      activeTab = tab.key;
+      render();
+    };
     nav.appendChild(btn);
   });
 }
@@ -683,6 +721,19 @@ function fieldRow(label, value, onChange, auto, editable, onDelete) {
   }
   row.appendChild(right);
   return row;
+}
+
+const LAST_CONFIRMED_IRS_YEAR = 2026;
+function irsLimitReminder(year, label) {
+  if (year === LAST_CONFIRMED_IRS_YEAR) return null;
+  const el = document.createElement("div");
+  el.className = "irs-reminder";
+  el.innerHTML = `
+    This ${label} limit is carried forward and hasn't been confirmed for ${year} \u2014 the IRS usually
+    announces the real number in Oct/Nov of the prior year. <a href="https://www.irs.gov/retirement-plans/cola-increases-for-dollar-limitations-on-benefits-and-contributions" target="_blank" rel="noopener">Check the official IRS page</a>
+    and update the field above if it's changed.
+  `;
+  return el;
 }
 
 function addItemRow(container, placeholder, onAdd) {
@@ -1201,6 +1252,8 @@ function renderInvestmentsTab(app) {
   room.appendChild(fieldRow("Roth IRA limit (under age 50)", id.iraLimit, async (v) => {
     id.iraLimit = v; await saveKey("investmentInputs", investDataAll); render();
   }, false, editable));
+  const iraReminder = irsLimitReminder(selectedYear, "Roth IRA");
+  if (iraReminder) room.appendChild(iraReminder);
 
   const paceRow = document.createElement("div");
   paceRow.className = "row";
@@ -1211,24 +1264,6 @@ function renderInvestmentsTab(app) {
   roomLeftRow.className = "row";
   roomLeftRow.innerHTML = `<div class="rlabel">Room left in the year</div><div class="auto-val" style="color:${roomLeft < 0 ? "var(--red-bad)" : "var(--green-ok)"}">${fmt(roomLeft)}</div>`;
   room.appendChild(roomLeftRow);
-
-  const notesToggle = document.createElement("div");
-  notesToggle.className = "notes-toggle";
-  notesToggle.textContent = notesOpen.investStrategy ? "Hide strategy notes \u2212" : "Show strategy notes +";
-  notesToggle.onclick = () => { notesOpen.investStrategy = !notesOpen.investStrategy; render(); };
-  room.appendChild(notesToggle);
-
-  if (notesOpen.investStrategy) {
-    const noteBlock = document.createElement("div");
-    noteBlock.className = "note-block";
-    noteBlock.innerHTML = `
-      Roth is built aggressive (70% VGT/SCHG growth, 20% VTI core, 10% SCHD) since it's untouchable until retirement.
-      Brokerage is more balanced (60% VGT/SCHG, 20% VTI, 20% VXUS international) since you may tap it short-term.
-      SCHD sits only in the Roth (tax-free home for taxable dividends); VXUS sits only in the brokerage (foreign tax credit only works in a taxable account).
-      Expect real swings with this much growth/tech weighting. Not financial advice.
-    `;
-    room.appendChild(noteBlock);
-  }
 
   app.appendChild(room);
 }
@@ -1350,6 +1385,8 @@ function renderPayTab(app) {
   tsp.appendChild(fieldRow(`${selectedYear} elective deferral limit`, pd.rothLimit, async (v) => {
     pd.rothLimit = v; await saveKey("payInputs", payDataAll); render();
   }, false, editable));
+  const tspReminder = irsLimitReminder(selectedYear, "TSP elective deferral");
+  if (tspReminder) tsp.appendChild(tspReminder);
 
   const baseRow = document.createElement("div");
   baseRow.className = "row";
@@ -1499,14 +1536,21 @@ function initFirebase(config) {
       currentUser = null;
       currentUserDoc = {};
       document.getElementById("appRoot").style.display = "none";
+      setAuthMode("login");
       document.getElementById("loginScreen").style.display = "flex";
     }
   });
 }
 
 // ================= Login / Sign up =================
+let authMode = "login";
+let pendingGoogleCredential = null;
+let pendingGoogleEmail = null;
+
 function showLoginError(msg) {
   const el = document.getElementById("loginError");
+  el.style.background = "";
+  el.style.color = "";
   el.textContent = msg;
   el.style.display = "block";
 }
@@ -1517,7 +1561,14 @@ document.getElementById("googleLoginBtn").onclick = async () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     await auth.signInWithPopup(provider);
   } catch (e) {
-    showLoginError(e.message);
+    if (e.code === "auth/account-exists-with-different-credential") {
+      pendingGoogleCredential = e.credential;
+      pendingGoogleEmail = e.email;
+      document.getElementById("loginEmail").value = e.email || "";
+      showLoginError(`An account already exists for ${e.email} using a password. Log in with that password below \u2014 Google will be linked to it automatically so you can use either from now on.`);
+    } else {
+      showLoginError(e.message);
+    }
   }
 };
 
@@ -1526,18 +1577,51 @@ document.getElementById("loginBtn").onclick = async () => {
   const password = document.getElementById("loginPassword").value;
   document.getElementById("loginError").style.display = "none";
   try {
-    await auth.signInWithEmailAndPassword(email, password);
+    const result = await auth.signInWithEmailAndPassword(email, password);
+    if (pendingGoogleCredential && pendingGoogleEmail && email.toLowerCase() === pendingGoogleEmail.toLowerCase()) {
+      try {
+        await result.user.linkWithCredential(pendingGoogleCredential);
+      } catch (linkErr) {
+        console.error("Linking Google to this account failed", linkErr);
+      }
+      pendingGoogleCredential = null;
+      pendingGoogleEmail = null;
+    }
   } catch (e) {
     showLoginError(e.message);
   }
 };
 
-document.getElementById("signupBtn").onclick = async () => {
+document.getElementById("forgotPasswordLink").onclick = async () => {
+  document.getElementById("loginError").style.display = "none";
+  const email = document.getElementById("loginEmail").value.trim();
+  if (!email) {
+    showLoginError("Type your email above first, then tap \"Forgot password?\" again.");
+    return;
+  }
+  try {
+    await auth.sendPasswordResetEmail(email);
+    const el = document.getElementById("loginError");
+    el.style.background = "#E4F5EA";
+    el.style.color = "#1E6B3E";
+    el.textContent = `If an account exists for ${email}, a password reset link has been sent \u2014 check your inbox (and spam folder).`;
+    el.style.display = "block";
+  } catch (e) {
+    showLoginError(e.message);
+  }
+};
+
+document.getElementById("signupSubmitBtn").onclick = async () => {
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
   document.getElementById("loginError").style.display = "none";
   if (password.length < 6) {
     showLoginError("Password must be at least 6 characters.");
+    return;
+  }
+  if (password !== confirmPassword) {
+    showLoginError("Those passwords don't match \u2014 double-check both fields.");
     return;
   }
   try {
@@ -1546,6 +1630,47 @@ document.getElementById("signupBtn").onclick = async () => {
     showLoginError(e.message);
   }
 };
+
+// ================= Sign up / Log in mode switch =================
+function setAuthMode(mode) {
+  authMode = mode;
+  document.getElementById("loginError").style.display = "none";
+  document.getElementById("confirmPassword").value = "";
+  const isSignup = mode === "signup";
+  document.getElementById("loginTitle").textContent = isSignup ? "Create Account" : "Log In";
+  document.getElementById("loginSubtitle").textContent = isSignup
+    ? "Set up your own private budget \u2014 your data stays completely separate from anyone else using this app."
+    : "Log in to sync your budget across every device.";
+  document.getElementById("confirmPasswordField").style.display = isSignup ? "block" : "none";
+  document.getElementById("forgotPasswordLink").style.display = isSignup ? "none" : "block";
+  document.getElementById("loginBtn").style.display = isSignup ? "none" : "block";
+  document.getElementById("signupSubmitBtn").style.display = isSignup ? "block" : "none";
+  document.getElementById("switchToSignupLink").style.display = isSignup ? "none" : "block";
+  document.getElementById("switchToLoginLink").style.display = isSignup ? "block" : "none";
+}
+document.getElementById("switchToSignupLink").onclick = () => setAuthMode("signup");
+document.getElementById("switchToLoginLink").onclick = () => setAuthMode("login");
+
+// ================= Show/hide password toggles =================
+function setupPasswordToggle(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  const EYE_OPEN = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+  const EYE_CLOSED = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+  btn.onclick = () => {
+    if (input.type === "password") {
+      input.type = "text";
+      btn.innerHTML = EYE_CLOSED;
+      btn.title = "Hide password";
+    } else {
+      input.type = "password";
+      btn.innerHTML = EYE_OPEN;
+      btn.title = "Show password";
+    }
+  };
+}
+setupPasswordToggle("loginPassword", "togglePass1");
+setupPasswordToggle("confirmPassword", "togglePass2");
 
 document.getElementById("logoutBtn").onclick = async () => {
   if (!confirm("Log out?")) return;
